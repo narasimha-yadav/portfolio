@@ -487,6 +487,59 @@
     </div>
   </footer>
 
+  <!-- ===== AI CHATBOT WIDGET ===== -->
+  <div class="chatbot-wrapper" id="chatbotWrapper">
+
+    <!-- Toggle Button -->
+    <button class="chatbot-toggle" id="chatbotToggle" aria-label="Open AI Chat">
+      <span class="chatbot-toggle-icon open-icon"><i class="fas fa-robot"></i></span>
+      <span class="chatbot-toggle-icon close-icon" style="display:none"><i class="fas fa-times"></i></span>
+      <span class="chatbot-badge">AI</span>
+    </button>
+
+    <!-- Chat Panel -->
+    <div class="chatbot-panel" id="chatbotPanel">
+      <div class="chatbot-header">
+        <div class="chatbot-header-info">
+          <div class="chatbot-avatar"><i class="fas fa-robot"></i></div>
+          <div>
+            <h4>Ask about Rudru</h4>
+            <span class="chatbot-status"><span class="status-dot"></span> Online · Powered by Gemini</span>
+          </div>
+        </div>
+        <button class="chatbot-close" id="chatbotClose" aria-label="Close chat"><i class="fas fa-times"></i></button>
+      </div>
+
+      <div class="chatbot-messages" id="chatbotMessages">
+        <!-- Welcome message -->
+        <div class="chat-msg bot">
+          <div class="chat-bubble">
+            👋 Hi! I'm Rudru's AI assistant. Ask me anything about his skills, projects, experience, or how to get in touch!
+          </div>
+        </div>
+        <!-- Quick suggestions -->
+        <div class="chatbot-suggestions" id="chatbotSuggestions">
+          <button class="suggestion-btn">What are his skills?</button>
+          <button class="suggestion-btn">Tell me about his projects</button>
+          <button class="suggestion-btn">Is he available for hire?</button>
+          <button class="suggestion-btn">How to contact him?</button>
+        </div>
+      </div>
+
+      <div class="chatbot-input-area">
+        <input
+          type="text"
+          id="chatbotInput"
+          placeholder="Ask me anything..."
+          autocomplete="off"
+        />
+        <button class="chatbot-send" id="chatbotSend" aria-label="Send message">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>

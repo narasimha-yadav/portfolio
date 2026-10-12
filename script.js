@@ -163,3 +163,137 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.style.opacity = '1';
   });
 });
+
+/* ============================================================
+   AI CHATBOT
+   ============================================================ */
+(function () {
+  const toggle     = document.getElementById('chatbotToggle');
+  const panel      = document.getElementById('chatbotPanel');
+  const closeBtn   = document.getElementById('chatbotClose');
+  const input      = document.getElementById('chatbotInput');
+  const sendBtn    = document.getElementById('chatbotSend');
+  const messages   = document.getElementById('chatbotMessages');
+  const suggestBox = document.getElementById('chatbotSuggestions');
+  const openIcon   = toggle.querySelector('.open-icon');
+  const closeIcon  = toggle.querySelector('.close-icon');
+
+  // Conversation history (for multi-turn memory)
+  let history = [];
+  let isOpen  = false;
+  let isBusy  = false;
+
+  // ── Open / Close ──
+  function openChat() {
+    isOpen = true;
+    panel.classList.add('open');
+    openIcon.style.display = 'none';
+    closeIcon.style.display = 'flex';
+    input.focus();
+  }
+  function closeChat() {
+    isOpen = false;
+    panel.classList.remove('open');
+    openIcon.style.display = 'flex';
+    closeIcon.style.display = 'none';
+  }
+
+  toggle.addEventListener('click', () => isOpen ? closeChat() : openChat());
+  closeBtn.addEventListener('click', closeChat);
+
+  // ── Render a message bubble ──
+  function appendMessage(role, text) {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('chat-msg', role);
+    const bubble = document.createElement('div');
+    bubble.classList.add('chat-bubble');
+    bubble.textContent = text;
+    wrapper.appendChild(bubble);
+    messages.appendChild(wrapper);
+    messages.scrollTop = messages.scrollHeight;
+    return wrapper;
+  }
+
+  // ── Typing indicator ──
+  function showTyping() {
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('chat-msg', 'bot');
+    wrapper.id = 'typingIndicator';
+    wrapper.innerHTML = `
+      <div class="typing-indicator">
+        <span></span><span></span><span></span>
+      </div>`;
+    messages.appendChild(wrapper);
+    messages.scrollTop = messages.scrollHeight;
+  }
+  function hideTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  // ── Send message ──
+  async function sendMessage(text) {
+    if (!text.trim() || isBusy) return;
+    isBusy = true;
+    sendBtn.disabled = true;
+
+    // Hide suggestions after first message
+    if (suggestBox) suggestBox.style.display = 'none';
+
+    // Add user bubble
+    appendMessage('user', text);
+    input.value = '';
+
+    // Add to history
+    history.push({ role: 'user', content: text });
+
+    // Show typing
+    showTyping();
+
+    try {
+      const res = await fetch('/.netlify/functions/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: history }),
+      });
+
+      hideTyping();
+
+      if (!res.ok) {
+        throw new Error(`API error ${res.status}`);
+      }
+
+      const data = await res.json();
+      const reply = data.reply || "Sorry, I couldn't get a response right now.";
+
+      // Add bot bubble
+      appendMessage('bot', reply);
+      history.push({ role: 'assistant', content: reply });
+
+    } catch (err) {
+      hideTyping();
+      appendMessage('bot', '⚠️ Something went wrong. Please try again later.');
+      console.error('Chatbot error:', err);
+    }
+
+    isBusy = false;
+    sendBtn.disabled = false;
+    input.focus();
+  }
+
+  // ── Event listeners ──
+  sendBtn.addEventListener('click', () => sendMessage(input.value));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage(input.value);
+    }
+  });
+
+  // ── Quick suggestion buttons ──
+  document.querySelectorAll('.suggestion-btn').forEach(btn => {
+    btn.addEventListener('click', () => sendMessage(btn.textContent));
+  });
+
+})();
+
